@@ -1,0 +1,45 @@
+body {
+    background-color: #20C997;
+}
+
+section {
+    height: 100vh;
+    position: relative;
+}
+
+section .container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    width: 768px;
+}
+
+@media (max-width: 768px) {
+    section .container {
+        width: calc(100% - 20px);
+        margin: 0 auto;
+    }
+
+}
+
+section .container p i {
+    opacity: 50%;
+}
+
+section .container span i {
+    color: #212529;
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+}
+
+section .container span:nth-child(2) i:hover {
+    transform: scale(1.2);
+}
+
+.custom-tooltip {
+    --bs-tooltip-bg: #20C997;
+    --bs-tooltip-color: #fff;
+
+}
