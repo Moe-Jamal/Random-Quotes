@@ -1,8 +1,11 @@
 let previousRandomNum;
 let favQuotes = JSON.parse(localStorage.getItem("favQuotes")) || [];
+const quotesContainer = document.getElementById("quote-container");
+const myFavQuotes = document.getElementById("fav-quotes");
+const copyBtn = document.getElementById("copy-btn");
+const likeQuote = document.getElementById("quote-like");
 
 function randomQuote() {
-  const quotesContainer = document.getElementById("quote-container");
   const quotes = [
     {
       quote:
@@ -51,82 +54,87 @@ function randomQuote() {
   do {
     randomNum = Math.round(Math.random() * (quotes.length - 1));
   } while (randomNum === previousRandomNum);
-
   previousRandomNum = randomNum;
 
+  const selectedQuote = quotes[randomNum];
   quotesContainer.innerHTML = `
         <p id="quote" class="fw-bold fs-4">
             <i class="fa-solid fa-quote-left"></i>
-            ${quotes[randomNum].quote}
+            ${selectedQuote.quote}
             <i class="fa-solid fa-quote-right"></i>
         </p>
-        <h2 id="author" class="fs-5 text-end">${quotes[randomNum].author}</h2>`;
+        <h2 id="author" class="fs-5 text-end">${selectedQuote.author}</h2>`;
 
-  const copyBtn = document.getElementById("copy-btn");
-  copyBtn.addEventListener("click", () => {
-    const quoteText = quotes[randomNum].quote;
-    navigator.clipboard.writeText(quoteText);
-  });
-  const likeQuote = document.getElementById("quote-like");
-  likeQuote.classList.remove("fa-solid");
-  likeQuote.classList.add("fa-regular");
-  likeQuote.style.color = "#212529";
+  copyBtn.onclick = function () {
+    navigator.clipboard.writeText(selectedQuote.quote);
+  };
+
+  updateLikeIcon(selectedQuote);
+
   likeQuote.onclick = function () {
-    if (likeQuote.classList.contains("fa-regular")) {
-      likeQuote.classList.remove("fa-regular");
-      likeQuote.classList.add("fa-solid");
-      likeQuote.style.color = "red";
-      favQuotes.push(quotes[randomNum]);
-      localStorage.setItem("favQuotes", JSON.stringify(favQuotes));
-      console.log(favQuotes);
-    } else {
-      likeQuote.classList.remove("fa-solid");
-      likeQuote.classList.add("fa-regular");
+    const existingQuote = favQuotes.find(
+      (q) => q.quote === selectedQuote.quote
+    );
+    if (existingQuote) {
+      favQuotes = favQuotes.filter((q) => q.quote !== selectedQuote.quote);
+      likeQuote.classList.replace("fa-solid", "fa-regular");
       likeQuote.style.color = "#212529";
-      favQuotes.pop();
+    } else {
+      favQuotes.push(selectedQuote);
+      likeQuote.classList.replace("fa-regular", "fa-solid");
+      likeQuote.style.color = "red";
     }
+    localStorage.setItem("favQuotes", JSON.stringify(favQuotes));
     updateFavoriteQuotes();
   };
 }
 
-const myFavQuotes = document.getElementById("fav-quotes");
+function updateLikeIcon(selectedQuote) {
+  const isFavorite = favQuotes.some((q) => q.quote === selectedQuote.quote);
+  if (isFavorite) {
+    likeQuote.classList.replace("fa-regular", "fa-solid");
+    likeQuote.style.color = "red";
+  } else {
+    likeQuote.classList.replace("fa-solid", "fa-regular");
+    likeQuote.style.color = "#212529";
+  }
+}
+
 function updateFavoriteQuotes() {
   myFavQuotes.innerHTML = "";
-
   if (favQuotes.length === 0) {
     myFavQuotes.innerHTML = "You haven't added any quotes yet";
   } else {
     favQuotes.forEach((quote) => {
       const listItem = document.createElement("li");
       listItem.innerHTML = `
-        <p>
-          ${quote.quote}
-        </p>
+        <p>${quote.quote}</p>
         <span class="d-block float-end">${quote.author}</span>
-        <div class="clearfix mb-2"></div>
-      `;
+        <div class="clearfix mb-2"></div>`;
       myFavQuotes.appendChild(listItem);
     });
   }
 }
 
 function deleteAllFavQuotes() {
-  if (favQuotes.length >= 1) {
-    myFavQuotes.innerHTML = "You haven't added any quotes yet";
-    favQuotes = [];
-    localStorage.removeItem("favQuotes");
-  }
+  favQuotes = [];
+  localStorage.removeItem("favQuotes");
+  updateFavoriteQuotes();
+  updateLikeIcon();
+  myFavQuotes.innerHTML = "You haven't added any quotes yet";
 }
+
 document
   .getElementById("clear-favQuotes")
   .addEventListener("click", deleteAllFavQuotes);
-
 document
   .getElementById("quote-Generator")
   .addEventListener("click", randomQuote);
 
-randomQuote();
-updateFavoriteQuotes();
+document.addEventListener("DOMContentLoaded", () => {
+  randomQuote();
+  updateFavoriteQuotes();
+});
 
 // Tooltips
 const tooltipTriggerList = document.querySelectorAll(
